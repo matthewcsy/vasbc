@@ -334,7 +334,7 @@ export function AdminDashboard() {
                     onInput={(e) =>
                       setArticleForm((p) => ({
                         ...p,
-                        content: (e.target as HTMLDivElement).innerHTML,
+                        content: (e.target as HTMLDivElement).textContent ?? "",
                       }))
                     }
                   />

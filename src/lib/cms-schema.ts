@@ -53,6 +53,6 @@ export const defaultArticles: Article[] = [
     id: "r1",
     title: "團契生活與城市關懷",
     date: "2025-09-01",
-    content: "<p>在團契中彼此建立，並在社區中成為祝福。</p>",
+    content: "在團契中彼此建立，並在社區中成為祝福。",
   },
 ];
