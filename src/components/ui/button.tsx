@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "default" | "secondary" | "outline" | "destructive";
+  asChild?: boolean;
 };
 
 const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
@@ -19,17 +20,30 @@ export function Button({
   className,
   variant = "default",
   type = "button",
+  asChild = false,
+  children,
   ...props
 }: ButtonProps) {
+  const classes = cn(
+    "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-60",
+    variantClasses[variant],
+    className,
+  );
+
+  if (asChild && React.isValidElement(children)) {
+    const child = children as React.ReactElement<{ className?: string }>;
+    return React.cloneElement(child, {
+      className: cn(classes, child.props.className),
+    });
+  }
+
   return (
     <button
       type={type}
-      className={cn(
-        "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-60",
-        variantClasses[variant],
-        className,
-      )}
+      className={classes}
       {...props}
-    />
+    >
+      {children}
+    </button>
   );
 }

@@ -65,11 +65,7 @@ function saveCmsData(data: CmsData) {
 }
 
 export function useCmsData() {
-  const [data, setData] = useState<CmsData>(defaultCmsData);
-
-  useEffect(() => {
-    setData(loadCmsData());
-  }, []);
+  const [data, setData] = useState<CmsData>(() => loadCmsData());
 
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
