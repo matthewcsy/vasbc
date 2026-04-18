@@ -33,12 +33,12 @@ const sectionMeta: Record<AdminSectionKey, { label: string; title: string }> = {
   "standard-pages": { label: "標準頁面", title: "標準頁面管理" },
 };
 
-const MAX_IMAGE_FILE_BYTES = 2 * 1024 * 1024;
+const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
-    if (file.size > MAX_IMAGE_FILE_BYTES) {
-      reject(new Error("Image exceeds 2MB limit for browser local storage."));
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      reject(new Error("Image file size exceeds the 2MB limit."));
       return;
     }
 
