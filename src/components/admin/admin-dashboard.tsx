@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,92 +9,132 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  defaultAnnouncements,
-  defaultArticles,
-  defaultSermons,
-  type Announcement,
-  type Article,
-  type Sermon,
+import { useCmsData } from "@/lib/cms-storage";
+import type {
+  Announcement,
+  Article,
+  Sermon,
+  StandardPageContent,
 } from "@/lib/cms-schema";
 
-type Section = "announcements" | "sermons" | "articles";
+export const adminSectionKeys = [
+  "announcements",
+  "sermons",
+  "articles",
+  "standard-pages",
+] as const;
 
-export function AdminDashboard() {
-  const [activeSection, setActiveSection] = useState<Section>("announcements");
+export type AdminSectionKey = (typeof adminSectionKeys)[number];
 
-  const [announcements, setAnnouncements] =
-    useState<Announcement[]>(defaultAnnouncements);
+const sectionMeta: Record<AdminSectionKey, { label: string; title: string }> = {
+  announcements: { label: "最新消息", title: "最新消息管理" },
+  sermons: { label: "講道／專題", title: "講道／專題管理" },
+  articles: { label: "文章分享", title: "文章分享管理" },
+  "standard-pages": { label: "標準頁面", title: "標準頁面管理" },
+};
+
+const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
+
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      reject(new Error("Image file size exceeds the 2MB limit."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
+    reader.readAsDataURL(file);
+  });
+}
+
+type Props = {
+  activeSection: AdminSectionKey;
+};
+
+export function AdminDashboard({ activeSection }: Props) {
+  const { data, updateData } = useCmsData();
+
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     date: "",
     description: "",
     imageName: "",
+    imageUrl: "",
   });
-
-  const [sermons, setSermons] = useState<Sermon[]>(defaultSermons);
   const [sermonForm, setSermonForm] = useState({
     preacher: "",
     date: "",
     topic: "",
     mediaUrl: "",
   });
-
-  const [articles, setArticles] = useState<Article[]>(defaultArticles);
   const [articleForm, setArticleForm] = useState({
     title: "",
     date: "",
     content: "",
   });
 
-  const sectionTitle = useMemo(() => {
-    if (activeSection === "announcements") return "最新消息管理";
-    if (activeSection === "sermons") return "講道／專題管理";
-    return "文章分享管理";
-  }, [activeSection]);
+  const sectionTitle = useMemo(() => sectionMeta[activeSection].title, [activeSection]);
+
+  const updateAnnouncement = (id: string, patch: Partial<Announcement>) => {
+    updateData((previous) => ({
+      ...previous,
+      announcements: previous.announcements.map((item) =>
+        item.id === id ? { ...item, ...patch } : item,
+      ),
+    }));
+  };
+
+  const updateSermon = (id: string, patch: Partial<Sermon>) => {
+    updateData((previous) => ({
+      ...previous,
+      sermons: previous.sermons.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+    }));
+  };
+
+  const updateArticle = (id: string, patch: Partial<Article>) => {
+    updateData((previous) => ({
+      ...previous,
+      articles: previous.articles.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+    }));
+  };
+
+  const updateStandardPage = (key: string, patch: Partial<StandardPageContent>) => {
+    updateData((previous) => ({
+      ...previous,
+      standardPages: previous.standardPages.map((item) =>
+        item.key === key ? { ...item, ...patch } : item,
+      ),
+    }));
+  };
 
   return (
     <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 lg:grid-cols-[240px_minmax(0,1fr)] sm:px-6">
       <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-slate-500">Admin CMS</h2>
         <div className="grid gap-2">
-          <Button
-            variant={activeSection === "announcements" ? "secondary" : "outline"}
-            onClick={() => setActiveSection("announcements")}
-          >
-            最新消息
-          </Button>
-          <Button
-            variant={activeSection === "sermons" ? "secondary" : "outline"}
-            onClick={() => setActiveSection("sermons")}
-          >
-            講道／專題
-          </Button>
-          <Button
-            variant={activeSection === "articles" ? "secondary" : "outline"}
-            onClick={() => setActiveSection("articles")}
-          >
-            文章分享
-          </Button>
+          {adminSectionKeys.map((key) => (
+            <Button key={key} variant={activeSection === key ? "secondary" : "outline"} asChild>
+              <Link href={`/admin/${key}`}>{sectionMeta[key].label}</Link>
+            </Button>
+          ))}
         </div>
       </aside>
 
       <main className="space-y-4">
         <div>
           <Badge>受保護後台</Badge>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-900">
-            {sectionTitle}
-          </h1>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900">{sectionTitle}</h1>
           <p className="text-sm text-slate-600">
-            可直接進行新增、編輯、刪除（CRUD）操作。若設定 Supabase
-            環境變數，可延伸接上資料庫。
+            各管理功能均有獨立路由，方便直接引用與導覽。
           </p>
         </div>
 
         {activeSection === "announcements" && (
           <>
             <Card>
-              <CardTitle>Announcements Board（最新消息）</CardTitle>
+              <CardTitle>新增最新消息</CardTitle>
               <CardDescription>欄位：標題、日期、內容、圖片上傳</CardDescription>
               <div className="mt-4 grid gap-3">
                 <div>
@@ -124,10 +165,7 @@ export function AdminDashboard() {
                     rows={3}
                     value={announcementForm.description}
                     onChange={(e) =>
-                      setAnnouncementForm((p) => ({
-                        ...p,
-                        description: e.target.value,
-                      }))
+                      setAnnouncementForm((p) => ({ ...p, description: e.target.value }))
                     }
                   />
                 </div>
@@ -137,12 +175,20 @@ export function AdminDashboard() {
                     id="ann-image"
                     type="file"
                     accept="image/*"
-                    onChange={(e) =>
-                      setAnnouncementForm((p) => ({
-                        ...p,
-                        imageName: e.target.files?.[0]?.name ?? "",
-                      }))
-                    }
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const imageUrl = await fileToDataUrl(file);
+                        setAnnouncementForm((p) => ({
+                          ...p,
+                          imageName: file.name,
+                          imageUrl,
+                        }));
+                      } catch (error) {
+                        alert((error as Error).message);
+                      }
+                    }}
                   />
                 </div>
                 <Button
@@ -153,15 +199,19 @@ export function AdminDashboard() {
                       !announcementForm.description
                     )
                       return;
-                    setAnnouncements((prev) => [
-                      { id: crypto.randomUUID(), ...announcementForm },
-                      ...prev,
-                    ]);
+                    updateData((previous) => ({
+                      ...previous,
+                      announcements: [
+                        { id: crypto.randomUUID(), ...announcementForm },
+                        ...previous.announcements,
+                      ],
+                    }));
                     setAnnouncementForm({
                       title: "",
                       date: "",
                       description: "",
                       imageName: "",
+                      imageUrl: "",
                     });
                   }}
                 >
@@ -169,29 +219,66 @@ export function AdminDashboard() {
                 </Button>
               </div>
             </Card>
+
             <div className="grid gap-3">
-              {announcements.map((item) => (
-                <Card key={item.id} className="flex items-start justify-between gap-4">
-                  <div>
-                    <CardTitle>{item.title}</CardTitle>
-                    <CardDescription>{item.date}</CardDescription>
-                    <p className="mt-2 text-sm text-slate-700">{item.description}</p>
-                    {item.imageName && (
-                      <p className="mt-1 text-xs text-slate-500">
-                        圖片：{item.imageName}
-                      </p>
-                    )}
+              {data.announcements.map((item) => (
+                <Card key={item.id} className="space-y-3">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <Label>標題</Label>
+                      <Input
+                        value={item.title}
+                        onChange={(e) => updateAnnouncement(item.id, { title: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>日期</Label>
+                      <Input
+                        type="date"
+                        value={item.date}
+                        onChange={(e) => updateAnnouncement(item.id, { date: e.target.value })}
+                      />
+                    </div>
                   </div>
-                  <Button
-                    variant="destructive"
-                    onClick={() =>
-                      setAnnouncements((prev) =>
-                        prev.filter((it) => it.id !== item.id),
-                      )
-                    }
-                  >
-                    刪除
-                  </Button>
+                  <div>
+                    <Label>內容</Label>
+                    <Textarea
+                      value={item.description}
+                      onChange={(e) =>
+                        updateAnnouncement(item.id, { description: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      className="max-w-md"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const imageUrl = await fileToDataUrl(file);
+                          updateAnnouncement(item.id, { imageName: file.name, imageUrl });
+                        } catch (error) {
+                          alert((error as Error).message);
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="destructive"
+                      onClick={() =>
+                        updateData((previous) => ({
+                          ...previous,
+                          announcements: previous.announcements.filter(
+                            (announcement) => announcement.id !== item.id,
+                          ),
+                        }))
+                      }
+                    >
+                      刪除
+                    </Button>
+                  </div>
                 </Card>
               ))}
             </div>
@@ -201,19 +288,15 @@ export function AdminDashboard() {
         {activeSection === "sermons" && (
           <>
             <Card>
-              <CardTitle>Sermons Upload（講道／專題）</CardTitle>
-              <CardDescription>
-                欄位：講員、日期、講題、Audio/Video URL
-              </CardDescription>
+              <CardTitle>新增講道／專題</CardTitle>
+              <CardDescription>欄位：講員、日期、講題、Audio/Video URL</CardDescription>
               <div className="mt-4 grid gap-3">
                 <div>
                   <Label htmlFor="sermon-preacher">講員</Label>
                   <Input
                     id="sermon-preacher"
                     value={sermonForm.preacher}
-                    onChange={(e) =>
-                      setSermonForm((p) => ({ ...p, preacher: e.target.value }))
-                    }
+                    onChange={(e) => setSermonForm((p) => ({ ...p, preacher: e.target.value }))}
                   />
                 </div>
                 <div>
@@ -222,9 +305,7 @@ export function AdminDashboard() {
                     id="sermon-date"
                     type="date"
                     value={sermonForm.date}
-                    onChange={(e) =>
-                      setSermonForm((p) => ({ ...p, date: e.target.value }))
-                    }
+                    onChange={(e) => setSermonForm((p) => ({ ...p, date: e.target.value }))}
                   />
                 </div>
                 <div>
@@ -232,9 +313,7 @@ export function AdminDashboard() {
                   <Input
                     id="sermon-topic"
                     value={sermonForm.topic}
-                    onChange={(e) =>
-                      setSermonForm((p) => ({ ...p, topic: e.target.value }))
-                    }
+                    onChange={(e) => setSermonForm((p) => ({ ...p, topic: e.target.value }))}
                   />
                 </div>
                 <div>
@@ -242,9 +321,7 @@ export function AdminDashboard() {
                   <Input
                     id="sermon-url"
                     value={sermonForm.mediaUrl}
-                    onChange={(e) =>
-                      setSermonForm((p) => ({ ...p, mediaUrl: e.target.value }))
-                    }
+                    onChange={(e) => setSermonForm((p) => ({ ...p, mediaUrl: e.target.value }))}
                   />
                 </div>
                 <Button
@@ -256,38 +333,59 @@ export function AdminDashboard() {
                       !sermonForm.mediaUrl
                     )
                       return;
-                    setSermons((prev) => [
-                      { id: crypto.randomUUID(), ...sermonForm },
-                      ...prev,
-                    ]);
-                    setSermonForm({
-                      preacher: "",
-                      date: "",
-                      topic: "",
-                      mediaUrl: "",
-                    });
+                    updateData((previous) => ({
+                      ...previous,
+                      sermons: [{ id: crypto.randomUUID(), ...sermonForm }, ...previous.sermons],
+                    }));
+                    setSermonForm({ preacher: "", date: "", topic: "", mediaUrl: "" });
                   }}
                 >
                   新增講道
                 </Button>
               </div>
             </Card>
+
             <div className="grid gap-3">
-              {sermons.map((item) => (
-                <Card key={item.id} className="flex items-start justify-between gap-4">
+              {data.sermons.map((item) => (
+                <Card key={item.id} className="space-y-3">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <Label>講員</Label>
+                      <Input
+                        value={item.preacher}
+                        onChange={(e) => updateSermon(item.id, { preacher: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>日期</Label>
+                      <Input
+                        type="date"
+                        value={item.date}
+                        onChange={(e) => updateSermon(item.id, { date: e.target.value })}
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <CardTitle>{item.topic}</CardTitle>
-                    <CardDescription>
-                      {item.preacher} ・ {item.date}
-                    </CardDescription>
-                    <p className="mt-2 truncate text-sm text-slate-700">
-                      {item.mediaUrl}
-                    </p>
+                    <Label>講題</Label>
+                    <Input
+                      value={item.topic}
+                      onChange={(e) => updateSermon(item.id, { topic: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Audio/Video URL</Label>
+                    <Input
+                      value={item.mediaUrl}
+                      onChange={(e) => updateSermon(item.id, { mediaUrl: e.target.value })}
+                    />
                   </div>
                   <Button
                     variant="destructive"
                     onClick={() =>
-                      setSermons((prev) => prev.filter((it) => it.id !== item.id))
+                      updateData((previous) => ({
+                        ...previous,
+                        sermons: previous.sermons.filter((sermon) => sermon.id !== item.id),
+                      }))
                     }
                   >
                     刪除
@@ -301,17 +399,15 @@ export function AdminDashboard() {
         {activeSection === "articles" && (
           <>
             <Card>
-              <CardTitle>Articles（文章分享）</CardTitle>
-              <CardDescription>Rich-text editor setup（contentEditable）</CardDescription>
+              <CardTitle>新增文章</CardTitle>
+              <CardDescription>欄位：標題、日期、內容</CardDescription>
               <div className="mt-4 grid gap-3">
                 <div>
                   <Label htmlFor="article-title">標題</Label>
                   <Input
                     id="article-title"
                     value={articleForm.title}
-                    onChange={(e) =>
-                      setArticleForm((p) => ({ ...p, title: e.target.value }))
-                    }
+                    onChange={(e) => setArticleForm((p) => ({ ...p, title: e.target.value }))}
                   />
                 </div>
                 <div>
@@ -320,56 +416,68 @@ export function AdminDashboard() {
                     id="article-date"
                     type="date"
                     value={articleForm.date}
-                    onChange={(e) =>
-                      setArticleForm((p) => ({ ...p, date: e.target.value }))
-                    }
+                    onChange={(e) => setArticleForm((p) => ({ ...p, date: e.target.value }))}
                   />
                 </div>
                 <div>
-                  <Label>內容（Rich Text）</Label>
-                  <div
-                    className="min-h-36 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
-                    contentEditable
-                    suppressContentEditableWarning
-                    onInput={(e) =>
-                      setArticleForm((p) => ({
-                        ...p,
-                        content: (e.target as HTMLDivElement).textContent ?? "",
-                      }))
-                    }
+                  <Label htmlFor="article-content">內容</Label>
+                  <Textarea
+                    id="article-content"
+                    rows={5}
+                    value={articleForm.content}
+                    onChange={(e) => setArticleForm((p) => ({ ...p, content: e.target.value }))}
                   />
                 </div>
                 <Button
                   onClick={() => {
-                    if (!articleForm.title || !articleForm.date || !articleForm.content)
-                      return;
-                    setArticles((prev) => [
-                      { id: crypto.randomUUID(), ...articleForm },
-                      ...prev,
-                    ]);
-                    setArticleForm({
-                      title: "",
-                      date: "",
-                      content: "",
-                    });
+                    if (!articleForm.title || !articleForm.date || !articleForm.content) return;
+                    updateData((previous) => ({
+                      ...previous,
+                      articles: [{ id: crypto.randomUUID(), ...articleForm }, ...previous.articles],
+                    }));
+                    setArticleForm({ title: "", date: "", content: "" });
                   }}
                 >
                   發佈文章
                 </Button>
               </div>
             </Card>
+
             <div className="grid gap-3">
-              {articles.map((item) => (
-                <Card key={item.id} className="flex items-start justify-between gap-4">
+              {data.articles.map((item) => (
+                <Card key={item.id} className="space-y-3">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <Label>標題</Label>
+                      <Input
+                        value={item.title}
+                        onChange={(e) => updateArticle(item.id, { title: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>日期</Label>
+                      <Input
+                        type="date"
+                        value={item.date}
+                        onChange={(e) => updateArticle(item.id, { date: e.target.value })}
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <CardTitle>{item.title}</CardTitle>
-                    <CardDescription>{item.date}</CardDescription>
-                    <p className="mt-2 text-sm text-slate-700">{item.content}</p>
+                    <Label>內容</Label>
+                    <Textarea
+                      rows={5}
+                      value={item.content}
+                      onChange={(e) => updateArticle(item.id, { content: e.target.value })}
+                    />
                   </div>
                   <Button
                     variant="destructive"
                     onClick={() =>
-                      setArticles((prev) => prev.filter((it) => it.id !== item.id))
+                      updateData((previous) => ({
+                        ...previous,
+                        articles: previous.articles.filter((article) => article.id !== item.id),
+                      }))
                     }
                   >
                     刪除
@@ -378,6 +486,77 @@ export function AdminDashboard() {
               ))}
             </div>
           </>
+        )}
+
+        {activeSection === "standard-pages" && (
+          <div className="grid gap-3">
+            {data.standardPages.map((item) => (
+              <Card key={item.key} className="space-y-3">
+                <CardTitle>{item.path}</CardTitle>
+                <CardDescription>可更新標題、內文、圖片與按鈕設定。</CardDescription>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <Label>標題</Label>
+                    <Input
+                      value={item.title}
+                      onChange={(e) => updateStandardPage(item.key, { title: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>按鈕文字</Label>
+                    <Input
+                      value={item.button?.label ?? ""}
+                      onChange={(e) =>
+                        updateStandardPage(item.key, {
+                          button: {
+                            label: e.target.value,
+                            href: item.button?.href ?? "",
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>描述</Label>
+                  <Textarea
+                    rows={3}
+                    value={item.description}
+                    onChange={(e) => updateStandardPage(item.key, { description: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>按鈕連結</Label>
+                  <Input
+                    value={item.button?.href ?? ""}
+                    onChange={(e) =>
+                      updateStandardPage(item.key, {
+                        button: {
+                          label: item.button?.label ?? "",
+                          href: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="max-w-md"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const imageUrl = await fileToDataUrl(file);
+                      updateStandardPage(item.key, { imageName: file.name, imageUrl });
+                    } catch (error) {
+                      alert((error as Error).message);
+                    }
+                  }}
+                />
+              </Card>
+            ))}
+          </div>
         )}
       </main>
     </div>

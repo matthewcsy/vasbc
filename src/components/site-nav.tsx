@@ -18,6 +18,7 @@ const aboutItems = [
 const navItems = [
   { label: "主頁", href: "/" },
   { label: "木川共享空間", href: "/mangrove-space", highlight: true },
+  { label: "最新消息", href: "/announcements" },
   { label: "聚會時間", href: "/gathering-times" },
   { label: "講道／專題", href: "/sermons-topics" },
   { label: "宣教工場", href: "/missions" },
