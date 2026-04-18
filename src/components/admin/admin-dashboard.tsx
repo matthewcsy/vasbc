@@ -327,20 +327,6 @@ export function AdminDashboard() {
                 </div>
                 <div>
                   <Label>內容（Rich Text）</Label>
-                  <div className="mb-2 flex gap-2">
-                    <Button variant="outline" onClick={() => document.execCommand("bold")}>
-                      B
-                    </Button>
-                    <Button variant="outline" onClick={() => document.execCommand("italic")}>
-                      I
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => document.execCommand("underline")}
-                    >
-                      U
-                    </Button>
-                  </div>
                   <div
                     className="min-h-36 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
                     contentEditable
