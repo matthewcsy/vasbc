@@ -1,0 +1,10 @@
+import { SimplePage } from "@/components/simple-page";
+
+export default function MissionsPage() {
+  return (
+    <SimplePage
+      title="宣教工場"
+      description="展示本地與海外宣教工場近況、代禱事項與參與方式。"
+    />
+  );
+}
