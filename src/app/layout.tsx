@@ -15,9 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-HK" className="h-full antialiased">
-      <body className="min-h-full bg-slate-50 text-slate-900">
+      <body className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
         <SiteNav />
-        <main className="flex-1">{children}</main>
+        <main className="w-full flex-1">{children}</main>
         <footer className="mt-12 border-t border-slate-200 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-600 sm:px-6">
             © {new Date().getFullYear()} 勝利道潮語浸信會・木川共享空間

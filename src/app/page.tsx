@@ -2,48 +2,32 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-
-const newsItems = [
-  {
-    id: "n1",
-    title: "兒童營",
-    date: "2025-07-15",
-    description: "為社區家庭而設的三天兒童營，包含遊戲、詩歌與信仰分享。",
-    image:
-      "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    id: "n2",
-    title: "暑期聖經班",
-    date: "2025-08-02",
-    description: "透過故事劇場和手工活動，讓孩子在歡笑中認識聖經真理。",
-    image:
-      "https://images.unsplash.com/photo-1529390079861-591de354faf5?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    id: "n3",
-    title: "福音足球挑戰盃",
-    date: "2025-09-13",
-    description: "教會與社區青年一同參與友誼賽，場邊設有福音分享與禱告站。",
-    image:
-      "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80",
-  },
-];
+import { useCmsData } from "@/lib/cms-storage";
 
 export default function Home() {
-  const [activeNews, setActiveNews] = useState<(typeof newsItems)[number] | null>(
+  const {
+    data: { announcements, sermons },
+  } = useCmsData();
+  const featuredAnnouncements = announcements.slice(0, 3);
+  const latestSermon = sermons[0];
+  const [activeNews, setActiveNews] = useState<(typeof announcements)[number] | null>(
     null,
   );
 
   return (
     <div className="space-y-14 pb-10">
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 pt-8 sm:px-6 lg:grid-cols-2 lg:pt-14">
+      <section
+        id="home-hero"
+        className="mx-auto grid max-w-7xl gap-6 px-4 pt-8 sm:px-6 lg:grid-cols-2 lg:pt-14"
+      >
         <motion.div
+          id="hero-intro"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -60,12 +44,17 @@ export default function Home() {
             2025至2026雙年度教會主題：扎根聖言，禱告守望，團契生活，見證福音
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button>參與聚會</Button>
-            <Button variant="outline">聯絡我們</Button>
+            <Button id="hero-join-button" asChild>
+              <Link href="/gathering-times">參與聚會</Link>
+            </Button>
+            <Button id="hero-contact-button" variant="outline" asChild>
+              <Link href="/contact-us">聯絡我們</Link>
+            </Button>
           </div>
         </motion.div>
 
         <motion.div
+          id="hero-mangrove"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -89,14 +78,22 @@ export default function Home() {
         </motion.div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 sm:px-6">
+      <section id="latest-news-section" className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-5 flex items-end justify-between">
-          <h2 className="text-2xl font-semibold text-slate-900">最新消息</h2>
-          <p className="text-sm text-slate-500">點擊卡片查看詳情</p>
+          <div>
+            <h2 id="latest-news-title" className="text-2xl font-semibold text-slate-900">
+              最新消息
+            </h2>
+            <p className="text-sm text-slate-500">點擊卡片查看詳情</p>
+          </div>
+          <Button id="latest-news-view-all-button" variant="outline" asChild>
+            <Link href="/announcements">查看全部</Link>
+          </Button>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {newsItems.map((item, idx) => (
+        <div id="latest-news-cards" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {featuredAnnouncements.map((item, idx) => (
             <motion.button
+              id={`latest-news-card-${item.id}`}
               type="button"
               key={item.id}
               whileHover={{ y: -4 }}
@@ -107,13 +104,15 @@ export default function Home() {
               className="overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm"
               onClick={() => setActiveNews(item)}
             >
-              <Image
-                src={item.image}
-                alt={item.title}
-                width={1000}
-                height={700}
-                className="h-44 w-full object-cover"
-              />
+              {item.imageUrl && (
+                <Image
+                  src={item.imageUrl}
+                  alt={item.title}
+                  width={1000}
+                  height={700}
+                  className="h-44 w-full object-cover"
+                />
+              )}
               <div className="p-4">
                 <CardTitle>{item.title}</CardTitle>
                 <CardDescription>{item.date}</CardDescription>
@@ -157,32 +156,39 @@ export default function Home() {
         </AnimatePresence>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 sm:px-6">
+      <section id="latest-sermons-section" className="mx-auto max-w-7xl px-4 sm:px-6">
         <Card className="overflow-hidden bg-white">
-          <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
-            <div className="rounded-2xl border border-slate-200 bg-slate-100 p-3">
-              <iframe
-                title="最新講道"
-                src="https://www.youtube.com/embed/ysz5S6PUM-U"
-                className="h-72 w-full rounded-xl"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              />
-            </div>
-            <div className="space-y-3 p-2">
-              <Badge>講道／專題</Badge>
-              <CardTitle>最新講道：扎根聖言，生命更新</CardTitle>
-              <CardDescription>講員：王傳道 ・ 日期：2025-10-05</CardDescription>
-              <audio controls className="mt-2 w-full">
-                <source
-                  src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-                  type="audio/mpeg"
+          <div className="grid gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
+            {sermons.map((item) => (
+              <div
+                id={`latest-sermon-card-${item.id}`}
+                key={item.id}
+                className="space-y-3 rounded-2xl border border-slate-200 bg-white p-3"
+              >
+                <iframe
+                  title={item.topic}
+                  src={item.mediaUrl}
+                  className="h-44 w-full rounded-xl"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 />
-              </audio>
-              <p className="text-sm text-slate-600">
-                可播放影片與音訊，作為最新講道與專題內容展示。
-              </p>
-            </div>
+                <Badge>講道／專題</Badge>
+                <CardTitle>{item.topic}</CardTitle>
+                <CardDescription>
+                  講員：{item.preacher} ・ 日期：{item.date}
+                </CardDescription>
+              </div>
+            ))}
           </div>
+          {latestSermon && (
+            <div className="border-t border-slate-200 p-4">
+              <p className="text-sm text-slate-600">
+                最新講道：{latestSermon.topic}（{latestSermon.date}）
+              </p>
+              <Button id="latest-sermons-view-all-button" className="mt-3" variant="outline" asChild>
+                <Link href="/sermons-topics">查看全部講道</Link>
+              </Button>
+            </div>
+          )}
         </Card>
       </section>
     </div>
