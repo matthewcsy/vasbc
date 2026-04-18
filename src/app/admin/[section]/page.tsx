@@ -11,6 +11,10 @@ type Props = {
   params: Promise<{ section: string }>;
 };
 
+function isAdminSectionKey(section: string): section is AdminSectionKey {
+  return (adminSectionKeys as readonly string[]).includes(section);
+}
+
 export default async function AdminSectionPage({ params }: Props) {
   const cookieStore = await cookies();
   const token = cookieStore.get("vasbc_admin_auth")?.value;
@@ -19,9 +23,9 @@ export default async function AdminSectionPage({ params }: Props) {
   }
 
   const { section } = await params;
-  if (!adminSectionKeys.includes(section as AdminSectionKey)) {
+  if (!isAdminSectionKey(section)) {
     notFound();
   }
 
-  return <AdminDashboard activeSection={section as AdminSectionKey} />;
+  return <AdminDashboard activeSection={section} />;
 }

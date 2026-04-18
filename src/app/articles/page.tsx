@@ -15,7 +15,7 @@ export default function ArticlesPage() {
   } = useCmsData();
 
   const sortedArticles = [...articles].sort((a, b) => b.date.localeCompare(a.date));
-  const latest = sortedArticles[0];
+  const latest = sortedArticles.at(0) ?? null;
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-10 sm:px-6">

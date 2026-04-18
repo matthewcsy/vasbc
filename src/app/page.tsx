@@ -15,7 +15,7 @@ export default function Home() {
     data: { announcements, sermons },
   } = useCmsData();
   const featuredAnnouncements = announcements.slice(0, 3);
-  const latestSermon = sermons[0];
+  const latestSermon = sermons.at(0) ?? null;
   const [activeNews, setActiveNews] = useState<(typeof announcements)[number] | null>(
     null,
   );

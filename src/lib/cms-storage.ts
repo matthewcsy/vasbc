@@ -26,7 +26,7 @@ export type CmsData = {
   standardPages: StandardPageContent[];
 };
 
-export const defaultCmsData: CmsData = {
+const defaultCmsData: CmsData = {
   announcements: defaultAnnouncements,
   sermons: defaultSermons,
   articles: defaultArticles,
@@ -48,7 +48,7 @@ function normalize(data: Partial<CmsData> | null | undefined): CmsData {
   };
 }
 
-export function loadCmsData(): CmsData {
+function loadCmsData(): CmsData {
   if (typeof window === "undefined") return defaultCmsData;
   const raw = window.localStorage.getItem(CMS_STORAGE_KEY);
   if (!raw) return defaultCmsData;
