@@ -46,8 +46,6 @@ export function AdminDashboard() {
     content: "",
   });
 
-  const toPlainText = (html: string) => html.replace(/<[^>]*>/g, "");
-
   const sectionTitle = useMemo(() => {
     if (activeSection === "announcements") return "最新消息管理";
     if (activeSection === "sermons") return "講道／專題管理";
@@ -380,7 +378,7 @@ export function AdminDashboard() {
                   <div>
                     <CardTitle>{item.title}</CardTitle>
                     <CardDescription>{item.date}</CardDescription>
-                    <p className="mt-2 text-sm text-slate-700">{toPlainText(item.content)}</p>
+                    <p className="mt-2 text-sm text-slate-700">{item.content}</p>
                   </div>
                   <Button
                     variant="destructive"
