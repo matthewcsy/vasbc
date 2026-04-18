@@ -16,15 +16,7 @@ import type {
   Sermon,
   StandardPageContent,
 } from "@/lib/cms-schema";
-
-export const adminSectionKeys = [
-  "announcements",
-  "sermons",
-  "articles",
-  "standard-pages",
-] as const;
-
-export type AdminSectionKey = (typeof adminSectionKeys)[number];
+import { adminSectionKeys, type AdminSectionKey } from "@/components/admin/admin-sections";
 
 const sectionMeta: Record<AdminSectionKey, { label: string; title: string }> = {
   announcements: { label: "最新消息", title: "最新消息管理" },

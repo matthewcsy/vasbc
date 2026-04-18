@@ -1,11 +1,8 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-import {
-  AdminDashboard,
-  adminSectionKeys,
-  type AdminSectionKey,
-} from "@/components/admin/admin-dashboard";
+import { AdminDashboard } from "@/components/admin/admin-dashboard";
+import { adminSectionKeys, type AdminSectionKey } from "@/components/admin/admin-sections";
 
 type Props = {
   params: Promise<{ section: string }>;
