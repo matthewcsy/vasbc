@@ -33,8 +33,15 @@ const sectionMeta: Record<AdminSectionKey, { label: string; title: string }> = {
   "standard-pages": { label: "標準頁面", title: "標準頁面管理" },
 };
 
+const MAX_IMAGE_FILE_BYTES = 2 * 1024 * 1024;
+
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
+    if (file.size > MAX_IMAGE_FILE_BYTES) {
+      reject(new Error("Image exceeds 2MB limit for browser local storage."));
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result ?? ""));
     reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
@@ -171,12 +178,16 @@ export function AdminDashboard({ activeSection }: Props) {
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      const imageUrl = await fileToDataUrl(file);
-                      setAnnouncementForm((p) => ({
-                        ...p,
-                        imageName: file.name,
-                        imageUrl,
-                      }));
+                      try {
+                        const imageUrl = await fileToDataUrl(file);
+                        setAnnouncementForm((p) => ({
+                          ...p,
+                          imageName: file.name,
+                          imageUrl,
+                        }));
+                      } catch (error) {
+                        alert((error as Error).message);
+                      }
                     }}
                   />
                 </div>
@@ -246,8 +257,12 @@ export function AdminDashboard({ activeSection }: Props) {
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
-                        const imageUrl = await fileToDataUrl(file);
-                        updateAnnouncement(item.id, { imageName: file.name, imageUrl });
+                        try {
+                          const imageUrl = await fileToDataUrl(file);
+                          updateAnnouncement(item.id, { imageName: file.name, imageUrl });
+                        } catch (error) {
+                          alert((error as Error).message);
+                        }
                       }}
                     />
                     <Button
@@ -531,8 +546,12 @@ export function AdminDashboard({ activeSection }: Props) {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    const imageUrl = await fileToDataUrl(file);
-                    updateStandardPage(item.key, { imageName: file.name, imageUrl });
+                    try {
+                      const imageUrl = await fileToDataUrl(file);
+                      updateStandardPage(item.key, { imageName: file.name, imageUrl });
+                    } catch (error) {
+                      alert((error as Error).message);
+                    }
                   }}
                 />
               </Card>

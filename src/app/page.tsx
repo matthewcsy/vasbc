@@ -15,6 +15,7 @@ export default function Home() {
     data: { announcements, sermons },
   } = useCmsData();
   const featuredAnnouncements = announcements.slice(0, 3);
+  const featuredSermons = sermons.slice(0, 3);
   const latestSermon = sermons.at(0) ?? null;
   const [activeNews, setActiveNews] = useState<(typeof announcements)[number] | null>(
     null,
@@ -159,7 +160,7 @@ export default function Home() {
       <section id="latest-sermons-section" className="mx-auto max-w-7xl px-4 sm:px-6">
         <Card className="overflow-hidden bg-white">
           <div className="grid gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
-            {sermons.map((item) => (
+            {featuredSermons.map((item) => (
               <div
                 id={`latest-sermon-card-${item.id}`}
                 key={item.id}
