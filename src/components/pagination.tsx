@@ -17,14 +17,14 @@ export function Pagination({
   return (
     <div className="flex items-center justify-center gap-3 pt-6">
       {page > 1 ? (
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" asChild>
           <Link href={`${basePath}?page=${page - 1}`}>
             <ChevronLeft className="mr-1 h-4 w-4" />
             上一頁
           </Link>
         </Button>
       ) : (
-        <Button variant="outline" size="sm" disabled>
+        <Button variant="outline" disabled>
           <ChevronLeft className="mr-1 h-4 w-4" />
           上一頁
         </Button>
@@ -35,14 +35,14 @@ export function Pagination({
       </span>
 
       {page < totalPages ? (
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" asChild>
           <Link href={`${basePath}?page=${page + 1}`}>
             下一頁
             <ChevronRight className="ml-1 h-4 w-4" />
           </Link>
         </Button>
       ) : (
-        <Button variant="outline" size="sm" disabled>
+        <Button variant="outline" disabled>
           下一頁
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
