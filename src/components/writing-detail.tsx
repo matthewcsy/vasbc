@@ -34,7 +34,7 @@ export function WritingDetail({
     <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
       {backHref && (
         <div className="mb-6">
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="outline" asChild>
             <Link href={backHref}>
               <ChevronLeft className="mr-1 h-4 w-4" />
               {backLabel}
