@@ -1,16 +1,8 @@
-import { SimplePage } from "@/components/simple-page";
+import Image from "next/image";
 
-export const dynamic = "force-dynamic";
-
-export default function ContactUsPage() {
-  return (
-    <SimplePage
-      pageKey="contact-us"
-      title="\u806f\u7d61\u6211\u5011"
-      description="\u63d0\u4f9b\u5730\u5740\u3001\u96fb\u8a71\u3001\u96fb\u90f5\u8207\u5730\u5716\uff0c\u6b61\u8fce\u96a8\u6642\u806f\u7d61\u6211\u5011\u3002"
-    />
-  );
-}
+import { ContactForm } from "./contact-form";
+import { Badge } from "@/components/ui/badge";
+import { getPageContent } from "@/lib/cms-storage";
 
 export const dynamic = "force-dynamic";
 

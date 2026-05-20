@@ -1,16 +1,9 @@
-import { SimplePage } from "@/components/simple-page";
+import Image from "next/image";
+import Link from "next/link";
 
-export const dynamic = "force-dynamic";
-
-export default function RecruitmentPage() {
-  return (
-    <SimplePage
-      pageKey="recruitment"
-      title="\u62db\u8058"
-      description="\u520a\u767b\u6559\u6703\u53ca\u6728\u5ddd\u5171\u4eab\u7a7a\u9593\u76f8\u95dc\u8077\u4f4d\u62db\u8058\u8cc7\u8a0a\u3002"
-    />
-  );
-}
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { getPageContent } from "@/lib/cms-storage";
 
 export const dynamic = "force-dynamic";
 
