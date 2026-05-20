@@ -1,21 +1,16 @@
-"use client";
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { useCmsData } from "@/lib/cms-storage";
+import { getWritingsByType } from "@/lib/cms-storage";
 
-function toSnippet(content: string, maxLength = 120) {
-  if (content.length <= maxLength) return content;
-  return `${content.slice(0, maxLength).trim()}…`;
+function toSnippet(text: string | null, maxLength = 120) {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trim()}…`;
 }
 
-export default function ArticlesPage() {
-  const {
-    data: { articles },
-  } = useCmsData();
-
-  const sortedArticles = [...articles].sort((a, b) => b.date.localeCompare(a.date));
-  const latest = sortedArticles.at(0) ?? null;
+export default async function ArticlesPage() {
+  const articles = await getWritingsByType("article");
+  const latest = articles.at(0) ?? null;
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-10 sm:px-6">
@@ -29,17 +24,17 @@ export default function ArticlesPage() {
         <Card className="border-emerald-200 bg-emerald-50/40">
           <CardDescription>最新文章</CardDescription>
           <CardTitle className="mt-2">{latest.title}</CardTitle>
-          <p className="mt-1 text-sm text-slate-500">{latest.date}</p>
-          <p className="mt-3 text-sm text-slate-700">{toSnippet(latest.content, 180)}</p>
+          <p className="mt-1 text-sm text-slate-500">{latest.date_iso ?? latest.date ?? ""}</p>
+          <p className="mt-3 text-sm text-slate-700">{toSnippet(latest.content_text, 180)}</p>
         </Card>
       )}
 
       <div className="grid gap-3">
-        {sortedArticles.map((item) => (
+        {articles.map((item) => (
           <Card key={item.id}>
             <CardTitle>{item.title}</CardTitle>
-            <CardDescription>{item.date}</CardDescription>
-            <p className="mt-2 text-sm text-slate-700">{toSnippet(item.content)}</p>
+            <CardDescription>{item.date_iso ?? item.date ?? ""}</CardDescription>
+            <p className="mt-2 text-sm text-slate-700">{toSnippet(item.content_text)}</p>
           </Card>
         ))}
       </div>

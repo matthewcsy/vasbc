@@ -3,6 +3,12 @@ import { notFound, redirect } from "next/navigation";
 
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
 import { adminSectionKeys, type AdminSectionKey } from "@/components/admin/admin-sections";
+import {
+  getAssembly,
+  getAllPageContents,
+  getNews,
+  getWritingsByType,
+} from "@/lib/cms-storage";
 
 type Props = {
   params: Promise<{ section: string }>;
@@ -24,5 +30,21 @@ export default async function AdminSectionPage({ params }: Props) {
     notFound();
   }
 
-  return <AdminDashboard activeSection={section} />;
+  const [news, sermons, articles, standardPages] = await Promise.all([
+    getNews(),
+    getAssembly(),
+    getWritingsByType("article"),
+    getAllPageContents(),
+  ]);
+
+  return (
+    <AdminDashboard
+      activeSection={section}
+      initialNews={news}
+      initialSermons={sermons}
+      initialArticles={articles}
+      initialStandardPages={standardPages}
+    />
+  );
 }
+

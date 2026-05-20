@@ -1,105 +1,80 @@
-"use client";
+/**
+ * Server-side Supabase query functions.
+ * Import these only in Server Components or Server Actions.
+ */
+import { supabase } from "./supabase";
+import type { AssemblyRow, NewsRow, WritingRow } from "./cms-schema";
+import { pageWritingTypes } from "./cms-schema";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import {
-  defaultAnnouncements,
-  defaultArticles,
-  defaultSermons,
-  defaultStandardPages,
-  type StandardPageKey,
-} from "@/lib/cms-schema";
-
-import type {
-  Announcement,
-  Article,
-  Sermon,
-  StandardPageContent,
-} from "@/lib/cms-schema";
-
-const CMS_STORAGE_KEY = "vasbc_cms_data_v1";
-
-export type CmsData = {
-  announcements: Announcement[];
-  sermons: Sermon[];
-  articles: Article[];
-  standardPages: StandardPageContent[];
-};
-
-const defaultCmsData: CmsData = {
-  announcements: defaultAnnouncements,
-  sermons: defaultSermons,
-  articles: defaultArticles,
-  standardPages: defaultStandardPages,
-};
-
-function normalize(data: Partial<CmsData> | null | undefined): CmsData {
-  return {
-    announcements:
-      data?.announcements && data.announcements.length > 0
-        ? data.announcements
-        : defaultAnnouncements,
-    sermons: data?.sermons && data.sermons.length > 0 ? data.sermons : defaultSermons,
-    articles: data?.articles && data.articles.length > 0 ? data.articles : defaultArticles,
-    standardPages:
-      data?.standardPages && data.standardPages.length > 0
-        ? data.standardPages
-        : defaultStandardPages,
-  };
-}
-
-function loadCmsData(): CmsData {
-  if (typeof window === "undefined") return defaultCmsData;
-  const raw = window.localStorage.getItem(CMS_STORAGE_KEY);
-  if (!raw) return defaultCmsData;
-  try {
-    return normalize(JSON.parse(raw) as CmsData);
-  } catch {
-    return defaultCmsData;
+/** All news rows, newest first */
+export async function getNews(): Promise<NewsRow[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("news")
+    .select("*")
+    .order("id", { ascending: false });
+  if (error) {
+    console.error("[getNews]", error.message);
+    return [];
   }
+  return (data ?? []) as NewsRow[];
 }
 
-function saveCmsData(data: CmsData) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(data));
+/** All assembly/sermon rows, newest date first */
+export async function getAssembly(): Promise<AssemblyRow[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("assembly")
+    .select("*")
+    .order("date_iso", { ascending: false, nullsFirst: false });
+  if (error) {
+    console.error("[getAssembly]", error.message);
+    return [];
+  }
+  return (data ?? []) as AssemblyRow[];
 }
 
-export function useCmsData() {
-  const [data, setData] = useState<CmsData>(() => loadCmsData());
-
-  useEffect(() => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === CMS_STORAGE_KEY) {
-        setData(loadCmsData());
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  const updateData = useCallback(
-    (updater: CmsData | ((previous: CmsData) => CmsData)) => {
-      setData((previous) => {
-        const next =
-          typeof updater === "function"
-            ? (updater as (previous: CmsData) => CmsData)(previous)
-            : updater;
-        saveCmsData(next);
-        return next;
-      });
-    },
-    [],
-  );
-
-  return { data, updateData };
+/** Writings filtered by type, newest date first */
+export async function getWritingsByType(type: string): Promise<WritingRow[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("writings")
+    .select("*")
+    .eq("type", type)
+    .order("date_iso", { ascending: false, nullsFirst: false });
+  if (error) {
+    console.error("[getWritingsByType]", error.message);
+    return [];
+  }
+  return (data ?? []) as WritingRow[];
 }
 
-export function useStandardPageContent(pageKey: StandardPageKey) {
-  const { data } = useCmsData();
-
-  return useMemo(
-    () => data.standardPages.find((item) => item.key === pageKey),
-    [data.standardPages, pageKey],
-  );
+/** Single CMS simple-page row by type key */
+export async function getPageContent(type: string): Promise<WritingRow | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("writings")
+    .select("*")
+    .eq("type", type)
+    .maybeSingle();
+  if (error) {
+    console.error("[getPageContent]", error.message);
+    return null;
+  }
+  return data as WritingRow | null;
 }
+
+/** All CMS simple-page rows at once (for admin panel) */
+export async function getAllPageContents(): Promise<WritingRow[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("writings")
+    .select("*")
+    .in("type", [...pageWritingTypes]);
+  if (error) {
+    console.error("[getAllPageContents]", error.message);
+    return [];
+  }
+  return (data ?? []) as WritingRow[];
+}
+
