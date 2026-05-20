@@ -30,10 +30,11 @@ export default async function AdminSectionPage({ params }: Props) {
     notFound();
   }
 
-  const [news, sermons, articles, standardPages] = await Promise.all([
+  const [news, sermons, articles, missionary, standardPages] = await Promise.all([
     getNews(),
     getAssembly(),
     getWritingsByType("article"),
+    getWritingsByType("missionary"),
     getAllPageContents(),
   ]);
 
@@ -43,6 +44,7 @@ export default async function AdminSectionPage({ params }: Props) {
       initialNews={news}
       initialSermons={sermons}
       initialArticles={articles}
+      initialMissionary={missionary}
       initialStandardPages={standardPages}
     />
   );

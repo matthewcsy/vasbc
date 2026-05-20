@@ -2,6 +2,7 @@ export const adminSectionKeys = [
   "announcements",
   "sermons",
   "articles",
+  "missionary",
   "standard-pages",
 ] as const;
 

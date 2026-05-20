@@ -2,7 +2,8 @@ import { Music } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { getAssembly } from "@/lib/cms-storage";
+import { Pagination } from "@/components/pagination";
+import { getAssemblyPaginated } from "@/lib/cms-storage";
 import type { AssemblyRow } from "@/lib/cms-schema";
 
 /** Extract a YouTube video ID from various URL formats */
@@ -58,15 +59,26 @@ function SermonMedia({ item }: { item: AssemblyRow }) {
 
 export const dynamic = "force-dynamic";
 
-export default async function SermonsTopicsPage() {
-  const sermons = await getAssembly();
+const PAGE_SIZE = 9;
+
+export default async function SermonsTopicsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
+  const { data: sermons, total } = await getAssemblyPaginated(page, PAGE_SIZE);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-10 sm:px-6">
       <div>
         <Badge>講道／專題</Badge>
         <h1 className="mt-3 text-3xl font-semibold text-slate-900">講道／專題</h1>
-        <p className="mt-2 text-slate-600">收錄教會最新講道與專題分享影音資源。</p>
+        <p className="mt-2 text-slate-600">
+          收錄教會最新講道與專題分享影音資源。共 {total} 則。
+        </p>
       </div>
       <div className="grid gap-4">
         {sermons.map((item) => (
@@ -84,6 +96,7 @@ export default async function SermonsTopicsPage() {
           </Card>
         ))}
       </div>
+      <Pagination page={page} totalPages={totalPages} basePath="/sermons-topics" />
     </div>
   );
 }

@@ -13,12 +13,15 @@ import type { AssemblyRow, NewsRow, WritingRow } from "@/lib/cms-schema";
 import { pageWritingTypes, type PageWritingType } from "@/lib/cms-schema";
 import {
   addArticleAction,
+  addMissionaryAction,
   addNewsAction,
   addSermonAction,
   deleteArticleAction,
+  deleteMissionaryAction,
   deleteNewsAction,
   deleteSermonAction,
   updateArticleAction,
+  updateMissionaryAction,
   updateNewsAction,
   updatePageContentAction,
   updateSermonAction,
@@ -30,6 +33,7 @@ const sectionMeta: Record<AdminSectionKey, { label: string; title: string }> = {
   announcements: { label: "最新消息", title: "最新消息管理" },
   sermons: { label: "講道／專題", title: "講道／專題管理" },
   articles: { label: "文章分享", title: "文章分享管理" },
+  missionary: { label: "宣教工場", title: "宣教工場管理" },
   "standard-pages": { label: "標準頁面", title: "標準頁面管理" },
 };
 
@@ -40,7 +44,6 @@ const pageTypeLabels: Record<PageWritingType, string> = {
   "about-covenant": "教會約章",
   "about-deacons": "執事名錄",
   "about-staff": "同工名錄",
-  missions: "宣教工場",
   recruitment: "招聘",
   "contact-us": "聯絡我們",
 };
@@ -50,6 +53,7 @@ type Props = {
   initialNews: NewsRow[];
   initialSermons: AssemblyRow[];
   initialArticles: WritingRow[];
+  initialMissionary: WritingRow[];
   initialStandardPages: WritingRow[];
 };
 
@@ -58,11 +62,13 @@ export function AdminDashboard({
   initialNews,
   initialSermons,
   initialArticles,
+  initialMissionary,
   initialStandardPages,
 }: Props) {
   const [news, setNews] = useState<NewsRow[]>(initialNews);
   const [sermons, setSermons] = useState<AssemblyRow[]>(initialSermons);
   const [articles, setArticles] = useState<WritingRow[]>(initialArticles);
+  const [missionary, setMissionary] = useState<WritingRow[]>(initialMissionary);
   const [standardPages, setStandardPages] = useState<WritingRow[]>(initialStandardPages);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,6 +93,14 @@ export function AdminDashboard({
 
   // ── Add-article form ───────────────────────────────────────
   const [articleForm, setArticleForm] = useState({
+    title: "",
+    date_iso: "",
+    author: "",
+    content_text: "",
+  });
+
+  // ── Add-missionary form ────────────────────────────────────
+  const [missionaryForm, setMissionaryForm] = useState({
     title: "",
     date_iso: "",
     author: "",
@@ -198,6 +212,35 @@ export function AdminDashboard({
   async function handleDeleteArticle(id: number) {
     await run(() => deleteArticleAction(id));
     setArticles((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  // ── Missionary handlers ────────────────────────────────────
+  async function handleAddMissionary() {
+    if (!missionaryForm.title || !missionaryForm.content_text) return;
+    const row = await run(() =>
+      addMissionaryAction({
+        title: missionaryForm.title,
+        content_text: missionaryForm.content_text,
+        date_iso: missionaryForm.date_iso || null,
+        author: missionaryForm.author || null,
+      }),
+    );
+    if (row) {
+      setMissionary((prev) => [row, ...prev]);
+      setMissionaryForm({ title: "", date_iso: "", author: "", content_text: "" });
+    }
+  }
+
+  async function handleUpdateMissionary(id: number, patch: Partial<WritingRow>) {
+    await run(() => updateMissionaryAction(id, patch));
+    setMissionary((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+    );
+  }
+
+  async function handleDeleteMissionary(id: number) {
+    await run(() => deleteMissionaryAction(id));
+    setMissionary((prev) => prev.filter((item) => item.id !== id));
   }
 
   // ── Standard page handlers ─────────────────────────────────
@@ -604,6 +647,125 @@ export function AdminDashboard({
                     variant="destructive"
                     disabled={busy}
                     onClick={() => void handleDeleteArticle(item.id)}
+                  >
+                    刪除
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── MISSIONARY ──────────────────────────────────── */}
+        {activeSection === "missionary" && (
+          <>
+            <Card>
+              <CardTitle>新增宣教報導</CardTitle>
+              <CardDescription>欄位：標題、日期、作者、內容</CardDescription>
+              <div className="mt-4 grid gap-3">
+                <div>
+                  <Label htmlFor="miss-title">標題 *</Label>
+                  <Input
+                    id="miss-title"
+                    value={missionaryForm.title}
+                    onChange={(e) =>
+                      setMissionaryForm((p) => ({ ...p, title: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="miss-date">日期</Label>
+                    <Input
+                      id="miss-date"
+                      type="date"
+                      value={missionaryForm.date_iso}
+                      onChange={(e) =>
+                        setMissionaryForm((p) => ({ ...p, date_iso: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="miss-author">作者／宣教士</Label>
+                    <Input
+                      id="miss-author"
+                      value={missionaryForm.author}
+                      onChange={(e) =>
+                        setMissionaryForm((p) => ({ ...p, author: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="miss-content">內容 *</Label>
+                  <Textarea
+                    id="miss-content"
+                    rows={5}
+                    value={missionaryForm.content_text}
+                    onChange={(e) =>
+                      setMissionaryForm((p) => ({ ...p, content_text: e.target.value }))
+                    }
+                  />
+                </div>
+                <Button onClick={handleAddMissionary} disabled={busy}>
+                  發佈報導
+                </Button>
+              </div>
+            </Card>
+
+            <div className="grid gap-3">
+              {missionary.map((item) => (
+                <Card key={item.id} className="space-y-3">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <Label>標題</Label>
+                      <Input
+                        defaultValue={item.title}
+                        onBlur={(e) =>
+                          void handleUpdateMissionary(item.id, { title: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>日期</Label>
+                      <Input
+                        type="date"
+                        defaultValue={item.date_iso ?? ""}
+                        onBlur={(e) =>
+                          void handleUpdateMissionary(item.id, {
+                            date_iso: e.target.value || null,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>作者／宣教士</Label>
+                    <Input
+                      defaultValue={item.author ?? ""}
+                      onBlur={(e) =>
+                        void handleUpdateMissionary(item.id, {
+                          author: e.target.value || null,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label>內容</Label>
+                    <Textarea
+                      rows={4}
+                      defaultValue={item.content_text ?? ""}
+                      onBlur={(e) =>
+                        void handleUpdateMissionary(item.id, {
+                          content_text: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <Button
+                    variant="destructive"
+                    disabled={busy}
+                    onClick={() => void handleDeleteMissionary(item.id)}
                   >
                     刪除
                   </Button>

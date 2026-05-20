@@ -44,13 +44,13 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="rounded-3xl bg-white p-8 shadow-sm"
+          className="rounded-3xl bg-[#FDFBF7] border border-[#E8E1D3] p-8 shadow-sm"
         >
           <Badge>主頁</Badge>
-          <h1 className="mt-5 text-3xl font-semibold leading-tight text-slate-900 sm:text-4xl">
+          <h1 className="mt-5 text-3xl font-semibold leading-tight text-[#2D2421] sm:text-4xl">
             勝利道潮語浸信會
           </h1>
-          <p className="mt-3 text-slate-600">
+          <p className="mt-3 text-[#4A3B32]">
             與社區同行，在聖言中扎根，在禱告中守望，在團契中彼此建立。
           </p>
           <p className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
@@ -71,11 +71,11 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative overflow-hidden rounded-3xl bg-emerald-950 p-8 text-white shadow-sm"
+          className="relative overflow-hidden rounded-3xl bg-[#314F40] p-8 text-white shadow-sm"
         >
-          <p className="text-sm text-emerald-100">木川共享空間</p>
+          <p className="text-sm text-[#EAECE7]">木川共享空間</p>
           <h2 className="mt-3 text-3xl font-semibold">Mangrove Space</h2>
-          <p className="mt-3 max-w-md text-emerald-100">
+          <p className="mt-3 max-w-md text-[#EAECE7]">
             一個溫暖且現代的社區空間，讓不同年齡的朋友能交流、學習與同行。
           </p>
           <div className="mt-6 h-56 overflow-hidden rounded-2xl border border-white/20">
@@ -95,10 +95,10 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
       <section id="latest-news-section" className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-5 flex items-end justify-between">
           <div>
-            <h2 id="latest-news-title" className="text-2xl font-semibold text-slate-900">
+            <h2 id="latest-news-title" className="text-2xl font-semibold text-[#2D2421]">
               最新消息
             </h2>
-            <p className="text-sm text-slate-500">點擊卡片查看詳情</p>
+            <p className="text-sm text-[#6B5C52]">點擊卡片查看詳情</p>
           </div>
           <Button id="latest-news-view-all-button" variant="outline" asChild>
             <Link href="/announcements">查看全部</Link>
@@ -115,7 +115,7 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               style={{ transitionDelay: `${idx * 80}ms` }}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm"
+              className="overflow-hidden rounded-2xl border border-[#E8E1D3] bg-[#FDFBF7] text-left shadow-sm"
               onClick={() => setActiveNews(item)}
             >
               {item.image_url && (
@@ -130,7 +130,7 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
               <div className="p-4">
                 <CardTitle>{item.title}</CardTitle>
                 <CardDescription>{item.published_at ?? ""}</CardDescription>
-                <p className="mt-2 line-clamp-2 text-sm text-slate-700">
+                <p className="mt-2 line-clamp-2 text-sm text-[#4A3B32]">
                   {item.content_text ?? ""}
                 </p>
               </div>
@@ -148,15 +148,15 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
               onClick={() => setActiveNews(null)}
             >
               <motion.div
-                className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-xl"
+                className="w-full max-w-xl rounded-2xl bg-[#FDFBF7] p-5 shadow-xl"
                 initial={{ scale: 0.95, y: 12 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 12 }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-xl font-semibold">{activeNews.title}</h3>
-                <p className="mt-1 text-sm text-slate-500">{activeNews.published_at ?? ""}</p>
-                <p className="mt-3 text-sm text-slate-700">{activeNews.content_text ?? ""}</p>
+                <p className="mt-1 text-sm text-[#6B5C52]">{activeNews.published_at ?? ""}</p>
+                <p className="mt-3 text-sm text-[#4A3B32]">{activeNews.content_text ?? ""}</p>
                 <div className="mt-5 flex justify-end">
                   <Button variant="outline" onClick={() => setActiveNews(null)}>
                     關閉
@@ -178,7 +178,7 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
                 <div
                   id={`latest-sermon-card-${item.id}`}
                   key={item.id}
-                  className="space-y-3 rounded-2xl border border-slate-200 bg-white p-3"
+                  className="space-y-3 rounded-2xl border border-[#E8E1D3] bg-[#FDFBF7] p-3"
                 >
                   {youtubeId ? (
                     <iframe
@@ -192,7 +192,7 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
                     // eslint-disable-next-line jsx-a11y/media-has-caption
                     <audio controls src={item.wav_url} className="w-full" />
                   ) : (
-                    <div className="flex h-44 items-center justify-center rounded-xl bg-slate-100 text-slate-400 text-sm">
+                    <div className="flex h-44 items-center justify-center rounded-xl bg-[#F0EBE1] text-[#C8C0B1] text-sm">
                       音頻未提供
                     </div>
                   )}
@@ -207,8 +207,8 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
             })}
           </div>
           {latestSermon && (
-            <div className="border-t border-slate-200 p-4">
-              <p className="text-sm text-slate-600">
+            <div className="border-t border-[#E8E1D3] p-4">
+              <p className="text-sm text-[#4A3B32]">
                 最新講道：{latestSermon.topic}（{latestSermon.date_iso ?? latestSermon.date ?? ""}）
               </p>
               <Button

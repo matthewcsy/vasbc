@@ -150,6 +150,44 @@ export async function deleteArticleAction(id: number): Promise<void> {
 }
 
 // ─────────────────────────────────────────────────────────────
+// WRITINGS — missionary reports
+// ─────────────────────────────────────────────────────────────
+
+export async function addMissionaryAction(payload: {
+  title: string;
+  content_text: string;
+  date_iso: string | null;
+  author: string | null;
+}): Promise<WritingRow> {
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("writings")
+    .insert({ ...payload, type: "missionary" })
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  revalidatePath("/missions");
+  return data as WritingRow;
+}
+
+export async function updateMissionaryAction(
+  id: number,
+  patch: Partial<Pick<WritingRow, "title" | "content_text" | "date_iso" | "author">>,
+): Promise<void> {
+  const db = createAdminClient();
+  const { error } = await db.from("writings").update(patch).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/missions");
+}
+
+export async function deleteMissionaryAction(id: number): Promise<void> {
+  const db = createAdminClient();
+  const { error } = await db.from("writings").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/missions");
+}
+
+// ─────────────────────────────────────────────────────────────
 // WRITINGS — simple pages (gathering-times, about/*, etc.)
 // ─────────────────────────────────────────────────────────────
 

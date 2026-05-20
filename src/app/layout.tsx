@@ -15,11 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-HK" className="h-full antialiased">
-      <body className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+      <body className="flex min-h-screen flex-col bg-[#F9F6F0] text-[#3A2E2A]">
         <SiteNav />
         <main className="w-full flex-1">{children}</main>
-        <footer className="mt-12 border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-600 sm:px-6">
+        <footer className="mt-12 border-t border-[#E8E1D3] bg-[#2D2421]">
+          <div className="mx-auto max-w-7xl px-4 py-6 text-sm text-[#C8C0B1] sm:px-6">
             © {new Date().getFullYear()} 勝利道潮語浸信會・木川共享空間
           </div>
         </footer>

@@ -51,7 +51,6 @@ export const pageWritingTypes = [
   "about-covenant",
   "about-deacons",
   "about-staff",
-  "missions",
   "recruitment",
   "contact-us",
 ] as const;
@@ -66,7 +65,6 @@ export const pageTypePaths: Record<PageWritingType, string> = {
   "about-covenant": "/about/covenant",
   "about-deacons": "/about/deacons",
   "about-staff": "/about/staff",
-  missions: "/missions",
   recruitment: "/recruitment",
   "contact-us": "/contact-us",
 };
