@@ -2,6 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { getWritingsByType } from "@/lib/cms-storage";
 
+export const dynamic = "force-dynamic";
+
 function toSnippet(text: string | null, maxLength = 120) {
   if (!text) return "";
   if (text.length <= maxLength) return text;

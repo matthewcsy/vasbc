@@ -1,5 +1,7 @@
 import { SimplePage } from "@/components/simple-page";
 
+export const dynamic = "force-dynamic";
+
 export default function StaffPage() {
   return (
     <SimplePage

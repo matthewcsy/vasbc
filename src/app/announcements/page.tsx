@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { getNews } from "@/lib/cms-storage";
 
+export const dynamic = "force-dynamic";
+
 export default async function AnnouncementsPage() {
   const news = await getNews();
 

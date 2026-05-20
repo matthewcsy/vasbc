@@ -56,6 +56,8 @@ function SermonMedia({ item }: { item: AssemblyRow }) {
   );
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function SermonsTopicsPage() {
   const sermons = await getAssembly();
 
