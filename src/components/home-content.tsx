@@ -1,9 +1,9 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { motion } from "framer-motion";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,42 +26,45 @@ function getYouTubeId(url: string): string | null {
 type Props = {
   featuredNews: NewsRow[];
   featuredSermons: AssemblyRow[];
+  carouselPhotos?: { id: number; url: string }[];
 };
 
-export function HomeContent({ featuredNews, featuredSermons }: Props) {
-  const latestSermon = featuredSermons.at(0) ?? null;
-  const [activeNews, setActiveNews] = useState<NewsRow | null>(null);
-
+export function HomeContent({ featuredNews, featuredSermons, carouselPhotos = [] }: Props) {
   return (
     <div className="space-y-14 pb-10">
-      {/* ── Hero ─────────────────────────────────────────────── */}
+      {/* ── Hero ──────────────────────────────────────────────── */}
       <section
         id="home-hero"
-        className="mx-auto grid max-w-7xl gap-6 px-4 pt-8 sm:px-6 lg:grid-cols-2 lg:pt-14"
+        className="relative mx-auto grid max-w-7xl gap-6 px-4 pt-8 sm:px-6 lg:grid-cols-2 lg:pt-14"
       >
+        {/* Background carousel */}
+        {carouselPhotos.length > 0 && (
+          <HeroCarousel photos={carouselPhotos} />
+        )}
+
         <motion.div
           id="hero-intro"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="rounded-3xl bg-[#FDFBF7] border border-[#E8E1D3] p-8 shadow-sm"
+          className="relative z-10 rounded-3xl bg-[#FDFBF7]/90 border border-[#E8E1D3] p-8 shadow-sm backdrop-blur-sm"
         >
           <Badge>主頁</Badge>
           <h1 className="mt-5 text-3xl font-semibold leading-tight text-[#2D2421] sm:text-4xl">
             勝利道潮語浸信會
           </h1>
           <p className="mt-3 text-[#4A3B32]">
-            與社區同行，在聖言中扎根，在禱告中守望，在團契中彼此建立。
+            與社區同行，在聖言中扎根，在祷告中守望，在團契中彼此建立。
           </p>
           <p className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
-            2025至2026雙年度教會主題：扎根聖言，禱告守望，團契生活，見證福音
+            2025至2026雙年度教會主題：扎根聖言，祷告守望，團契生活，見證福音
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button id="hero-join-button" asChild>
               <Link href="/gathering-times">參與聚會</Link>
             </Button>
             <Button id="hero-contact-button" variant="outline" asChild>
-              <Link href="/contact-us">聯絡我們</Link>
+              <Link href="/contact-us">联絡我們</Link>
             </Button>
           </div>
         </motion.div>
@@ -71,7 +74,7 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative overflow-hidden rounded-3xl bg-[#314F40] p-8 text-white shadow-sm"
+          className="relative z-10 overflow-hidden rounded-3xl bg-[#314F40]/90 p-8 text-white shadow-sm backdrop-blur-sm"
         >
           <p className="text-sm text-[#EAECE7]">木川共享空間</p>
           <h2 className="mt-3 text-3xl font-semibold">Mangrove Space</h2>
@@ -91,7 +94,7 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
         </motion.div>
       </section>
 
-      {/* ── Latest News ──────────────────────────────────────── */}
+      {/* ── Latest News ───────────────────────────────────────────── */}
       <section id="latest-news-section" className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-5 flex items-end justify-between">
           <div>
@@ -106,69 +109,42 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
         </div>
         <div id="latest-news-cards" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {featuredNews.map((item, idx) => (
-            <motion.button
+            <motion.div
               id={`latest-news-card-${item.id}`}
-              type="button"
               key={item.id}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               style={{ transitionDelay: `${idx * 80}ms` }}
-              className="overflow-hidden rounded-2xl border border-[#E8E1D3] bg-[#FDFBF7] text-left shadow-sm"
-              onClick={() => setActiveNews(item)}
             >
-              {item.image_url && (
-                <Image
-                  src={item.image_url}
-                  alt={item.title}
-                  width={1000}
-                  height={700}
-                  className="h-44 w-full object-cover"
-                />
-              )}
-              <div className="p-4">
-                <CardTitle>{item.title}</CardTitle>
-                <CardDescription>{item.published_at ?? ""}</CardDescription>
-                <p className="mt-2 line-clamp-2 text-sm text-[#4A3B32]">
-                  {item.content_text ?? ""}
-                </p>
-              </div>
-            </motion.button>
+              <Link
+                href={`/announcements/${item.id}`}
+                className="block overflow-hidden rounded-2xl border border-[#E8E1D3] bg-[#FDFBF7] text-left shadow-sm"
+              >
+                {item.image_url && (
+                  <Image
+                    src={item.image_url}
+                    alt={item.title}
+                    width={1000}
+                    height={700}
+                    className="h-44 w-full object-cover"
+                  />
+                )}
+                <div className="p-4">
+                  <CardTitle>{item.title}</CardTitle>
+                  <CardDescription>{item.published_at ?? ""}</CardDescription>
+                  <p className="mt-2 line-clamp-2 text-sm text-[#4A3B32]">
+                    {item.content_text ?? ""}
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
-
-        <AnimatePresence>
-          {activeNews && (
-            <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActiveNews(null)}
-            >
-              <motion.div
-                className="w-full max-w-xl rounded-2xl bg-[#FDFBF7] p-5 shadow-xl"
-                initial={{ scale: 0.95, y: 12 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 12 }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="text-xl font-semibold">{activeNews.title}</h3>
-                <p className="mt-1 text-sm text-[#6B5C52]">{activeNews.published_at ?? ""}</p>
-                <p className="mt-3 text-sm text-[#4A3B32]">{activeNews.content_text ?? ""}</p>
-                <div className="mt-5 flex justify-end">
-                  <Button variant="outline" onClick={() => setActiveNews(null)}>
-                    關閉
-                  </Button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </section>
 
-      {/* ── Latest Sermons ───────────────────────────────────── */}
+      {/* ── Latest Sermons ───────────────────────────────────────────── */}
       <section id="latest-sermons-section" className="mx-auto max-w-7xl px-4 sm:px-6">
         <Card className="overflow-hidden bg-white">
           <div className="grid gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
@@ -206,23 +182,51 @@ export function HomeContent({ featuredNews, featuredSermons }: Props) {
               );
             })}
           </div>
-          {latestSermon && (
-            <div className="border-t border-[#E8E1D3] p-4">
-              <p className="text-sm text-[#4A3B32]">
-                最新講道：{latestSermon.topic}（{latestSermon.date_iso ?? latestSermon.date ?? ""}）
-              </p>
-              <Button
-                id="latest-sermons-view-all-button"
-                className="mt-3"
-                variant="outline"
-                asChild
-              >
-                <Link href="/sermons-topics">查看全部講道</Link>
-              </Button>
-            </div>
-          )}
+          <div className="px-4 pb-4">
+            <Button
+              id="latest-sermons-view-all-button"
+              variant="outline"
+              asChild
+            >
+              <Link href="/sermons-topics">查看全部講道</Link>
+            </Button>
+          </div>
         </Card>
       </section>
+    </div>
+  );
+}
+
+// ── Hero background carousel (client-side auto-play) ──────────────────────────
+function HeroCarousel({ photos }: { photos: { id: number; url: string }[] }) {
+  // Import useState/useEffect/useMemo are already at the top of the file via "use client"
+  const [index, setIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (photos.length <= 1) return;
+    const t = setInterval(() => setIndex((i) => (i + 1) % photos.length), 5000);
+    return () => clearInterval(t);
+  }, [photos.length]);
+
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-3xl">
+      {photos.map((photo, i) => (
+        <div
+          key={photo.id}
+          className="absolute inset-0 transition-opacity duration-1000"
+          style={{ opacity: i === index ? 1 : 0 }}
+        >
+          <Image
+            src={photo.url}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority={i === 0}
+          />
+          <div className="absolute inset-0 bg-black/30" />
+        </div>
+      ))}
     </div>
   );
 }

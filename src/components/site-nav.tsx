@@ -50,10 +50,10 @@ export function SiteNav() {
           </Link>
 
           <div className="group relative">
-            <button className="flex items-center gap-1 text-sm font-medium text-[#4A3B32] transition hover:text-[#D06B4A]">
+            <button className="flex items-center gap-1 pb-3 text-sm font-medium text-[#4A3B32] transition hover:text-[#D06B4A]">
               認識教會 <ChevronDown className="h-4 w-4" />
             </button>
-            <div className="invisible absolute left-0 top-8 w-40 rounded-xl border border-[#E8E1D3] bg-[#FDFBF7] p-2 opacity-0 shadow-md transition group-hover:visible group-hover:opacity-100">
+            <div className="invisible absolute left-0 top-full w-40 rounded-xl border border-[#E8E1D3] bg-[#FDFBF7] p-2 opacity-0 shadow-md transition group-hover:visible group-hover:opacity-100">
               {aboutItems.map((item) => (
                 <Link
                   key={item.href}

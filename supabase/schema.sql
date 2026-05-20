@@ -88,11 +88,72 @@ CREATE POLICY "public_read_writings"
 
 
 -- ─────────────────────────────────────────────────────────────
--- SUPABASE STORAGE BUCKET (for announcement images)
--- Do this in the Dashboard UI, NOT here:
---   Dashboard → Storage → New bucket
---   Bucket name : announcements
---   Public      : YES (tick the checkbox)
+-- SCHEMA ADDITIONS (run these ALTER statements on existing DBs)
+-- ─────────────────────────────────────────────────────────────
+
+-- Announcement category ('church' | 'mangrove')
+ALTER TABLE news ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'church';
+-- Soft-delete flags
+ALTER TABLE news     ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE assembly ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE writings ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT false;
+-- Optional text/HTML content on sermons
+ALTER TABLE assembly ADD COLUMN IF NOT EXISTS content_text TEXT;
+ALTER TABLE assembly ADD COLUMN IF NOT EXISTS content_html TEXT;
+
+-- Photo library
+CREATE TABLE IF NOT EXISTS photos (
+  id               BIGSERIAL PRIMARY KEY,
+  filename         TEXT        NOT NULL,
+  url              TEXT        NOT NULL,
+  width            INTEGER,
+  height           INTEGER,
+  is_widescreen    BOOLEAN     NOT NULL DEFAULT false, -- true if 16:9 or wider
+  in_hero_carousel BOOLEAN     NOT NULL DEFAULT false,
+  hero_order       INTEGER,                            -- sequence in hero carousel
+  created_at       TIMESTAMPTZ          DEFAULT NOW(),
+  is_deleted       BOOLEAN     NOT NULL DEFAULT false
+);
+
+-- Photo galleries (named albums)
+CREATE TABLE IF NOT EXISTS photo_galleries (
+  id         BIGSERIAL PRIMARY KEY,
+  title      TEXT        NOT NULL,
+  created_at TIMESTAMPTZ          DEFAULT NOW(),
+  is_deleted BOOLEAN     NOT NULL DEFAULT false
+);
+
+-- Photos belonging to a gallery (ordered)
+CREATE TABLE IF NOT EXISTS photo_gallery_items (
+  id         BIGSERIAL PRIMARY KEY,
+  gallery_id BIGINT      NOT NULL REFERENCES photo_galleries (id) ON DELETE CASCADE,
+  photo_id   BIGINT      NOT NULL REFERENCES photos (id) ON DELETE CASCADE,
+  sort_order INTEGER     NOT NULL DEFAULT 0,
+  UNIQUE (gallery_id, photo_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_photos_carousel ON photos (in_hero_carousel, hero_order)
+  WHERE in_hero_carousel = true AND is_deleted = false;
+
+-- RLS for new tables (public read; service role writes via Server Actions)
+ALTER TABLE photos              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE photo_galleries     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE photo_gallery_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "public_read_photos"
+  ON photos FOR SELECT USING (is_deleted = false);
+
+CREATE POLICY "public_read_photo_galleries"
+  ON photo_galleries FOR SELECT USING (is_deleted = false);
+
+CREATE POLICY "public_read_photo_gallery_items"
+  ON photo_gallery_items FOR SELECT USING (true);
+
+-- ─────────────────────────────────────────────────────────────
+-- SUPABASE STORAGE BUCKETS
+-- Do these in the Dashboard UI → Storage → New bucket:
+--   Bucket name : announcements   Public: YES
+--   Bucket name : photos          Public: YES
 -- ─────────────────────────────────────────────────────────────
 
 

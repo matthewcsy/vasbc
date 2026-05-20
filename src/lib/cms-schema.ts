@@ -9,19 +9,24 @@ export type NewsRow = {
   content_text: string | null; // short description shown on cards
   image_url: string | null;
   published_at: string | null;
+  category: string;            // 'church' | 'mangrove'
+  is_deleted: boolean;
   scraped_at: string;
 };
 
 export type AssemblyRow = {
   id: number;
-  date: string | null;     // raw Chinese date string
-  date_iso: string | null; // normalised YYYY-MM-DD
+  date: string | null;         // raw Chinese date string
+  date_iso: string | null;     // normalised YYYY-MM-DD
   speaker: string | null;
   topic: string | null;
   wav_filename: string | null;
   wav_url: string | null;        // direct WAV streaming URL
   audio_mp3_path: string | null; // local path on scraper machine
   youtube_url: string | null;    // manually added YouTube link
+  content_text: string | null;   // optional plain-text transcript / notes
+  content_html: string | null;   // optional rich-text transcript / notes
+  is_deleted: boolean;
   scraped_at: string;
 };
 
@@ -37,7 +42,35 @@ export type WritingRow = {
   image_url: string | null;    // hero image for simple pages
   button_label: string | null; // CTA button label for simple pages
   button_href: string | null;  // CTA button link for simple pages
+  is_deleted: boolean;
   scraped_at: string;
+};
+
+export type PhotoRow = {
+  id: number;
+  filename: string;
+  url: string;
+  width: number | null;
+  height: number | null;
+  is_widescreen: boolean;      // true if 16:9 aspect ratio or wider
+  in_hero_carousel: boolean;
+  hero_order: number | null;   // carousel sequence (1-based)
+  created_at: string;
+  is_deleted: boolean;
+};
+
+export type PhotoGalleryRow = {
+  id: number;
+  title: string;
+  created_at: string;
+  is_deleted: boolean;
+};
+
+export type PhotoGalleryItemRow = {
+  id: number;
+  gallery_id: number;
+  photo_id: number;
+  sort_order: number;
 };
 
 // ─────────────────────────────────────────────────────────────

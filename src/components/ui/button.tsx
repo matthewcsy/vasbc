@@ -3,7 +3,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "default" | "secondary" | "outline" | "destructive";
+  variant?: "default" | "secondary" | "outline" | "destructive" | "ghost";
+  size?: "sm" | "default" | "lg";
   asChild?: boolean;
 };
 
@@ -14,19 +15,28 @@ const variantClasses: Record<NonNullable<ButtonProps["variant"]>, string> = {
   outline:
     "border border-[#E8E1D3] bg-[#FDFBF7] text-[#3A2E2A] hover:bg-[#F0EBE1] shadow-sm",
   destructive: "bg-rose-600 text-white hover:bg-rose-500 shadow-sm",
+  ghost: "text-[#3A2E2A] hover:bg-[#F0EBE1]",
+};
+
+const sizeClasses: Record<NonNullable<ButtonProps["size"]>, string> = {
+  sm: "px-3 py-1 text-xs",
+  default: "px-4 py-2 text-sm",
+  lg: "px-6 py-3 text-base",
 };
 
 export function Button({
   className,
   variant = "default",
+  size = "default",
   type = "button",
   asChild = false,
   children,
   ...props
 }: ButtonProps) {
   const classes = cn(
-    "inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D06B4A] disabled:pointer-events-none disabled:opacity-60",
+    "inline-flex items-center justify-center rounded-full font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D06B4A] disabled:pointer-events-none disabled:opacity-60",
     variantClasses[variant],
+    sizeClasses[size],
     className,
   );
 

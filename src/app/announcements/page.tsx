@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
@@ -28,22 +29,24 @@ export default async function AnnouncementsPage({
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {news.map((item) => (
-          <Card key={item.id} className="overflow-hidden p-0">
-            {item.image_url && (
-              <Image
-                src={item.image_url}
-                alt={item.title}
-                width={1000}
-                height={700}
-                className="h-44 w-full object-cover"
-              />
-            )}
-            <div className="p-4">
-              <CardTitle>{item.title}</CardTitle>
-              <CardDescription>{item.published_at ?? ""}</CardDescription>
-              <p className="mt-2 text-sm text-slate-700">{item.content_text ?? ""}</p>
-            </div>
-          </Card>
+          <Link key={item.id} href={`/announcements/${item.id}`} className="block h-full">
+            <Card className="h-full overflow-hidden p-0 transition-colors hover:border-slate-300">
+              {item.image_url && (
+                <Image
+                  src={item.image_url}
+                  alt={item.title}
+                  width={1000}
+                  height={700}
+                  className="h-44 w-full object-cover"
+                />
+              )}
+              <div className="p-4">
+                <CardTitle>{item.title}</CardTitle>
+                <CardDescription>{item.published_at ?? ""}</CardDescription>
+                <p className="mt-2 text-sm text-slate-700">{item.content_text ?? ""}</p>
+              </div>
+            </Card>
+          </Link>
         ))}
       </div>
       <Pagination page={page} totalPages={totalPages} basePath="/announcements" />

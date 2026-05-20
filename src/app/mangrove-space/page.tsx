@@ -1,9 +1,16 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { getNewsByCategory } from "@/lib/cms-storage";
 
-export default function MangroveSpacePage() {
+export const dynamic = "force-dynamic";
+
+export default async function MangroveSpacePage() {
+  const mangroveNews = await getNewsByCategory("mangrove");
+  const latestMangrove = mangroveNews.slice(0, 3);
+
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-10 sm:px-6">
       <section className="grid gap-6 rounded-3xl bg-[#f8f5ef] p-6 shadow-sm lg:grid-cols-[1.1fr_1fr]">
@@ -28,22 +35,58 @@ export default function MangroveSpacePage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
+        {/* Instagram widget */}
         <Card className="bg-white">
           <CardTitle>IG/FB Social Feed</CardTitle>
           <CardDescription>
-            社交媒體整合預留區塊（Instagram / Facebook）
+            @mangrove_space 的最新動態
           </CardDescription>
-          <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
-            IG/FB Feed Placeholder
+          <div className="mt-4">
+            {/* Elfsight Instagram Feed widget — replace the class attribute with
+                your widget ID from https://elfsight.com after signing up.
+                Then add their script tag to app/layout.tsx:
+                <Script src="https://static.elfsight.com/platform/platform.js" strategy="lazyOnload" /> */}
+            <div
+              className="elfsight-app-REPLACE_WITH_YOUR_WIDGET_ID"
+              data-elfsight-app-lazy
+            />
+            <p className="mt-3 text-xs text-slate-400">
+              <a
+                href="https://www.instagram.com/mangrove_space/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-slate-600"
+              >
+                在 Instagram 上關注 @mangrove_space ↗
+              </a>
+            </p>
           </div>
         </Card>
 
+        {/* Mangrove announcements */}
         <Card className="bg-white">
-          <CardTitle>合辦活動重點</CardTitle>
-          <CardDescription>兒童牧區與木川合辦活動</CardDescription>
-          <div className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">
-            本月重點：兒童牧區與木川共享空間將於週六舉行「親子故事日＋創意手作工作坊」。
-          </div>
+          <CardTitle>木川消息</CardTitle>
+          <CardDescription>木川共享空間最新消息</CardDescription>
+          {latestMangrove.length === 0 ? (
+            <div className="mt-4 rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">
+              暫無消息
+            </div>
+          ) : (
+            <div className="mt-3 grid gap-2">
+              {latestMangrove.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/announcements/${item.id}`}
+                  className="block rounded-xl border border-[#E8E1D3] bg-[#FDFBF7] p-3 transition-colors hover:border-[#C8B89A]"
+                >
+                  <p className="line-clamp-1 text-sm font-medium text-[#2D2421]">{item.title}</p>
+                  {item.published_at && (
+                    <p className="mt-0.5 text-xs text-[#6B5C52]">{item.published_at}</p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
         </Card>
       </section>
     </div>

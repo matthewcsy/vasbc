@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 import { SiteNav } from "@/components/site-nav";
@@ -23,6 +24,8 @@ export default function RootLayout({
             © {new Date().getFullYear()} 勝利道潮語浸信會・木川共享空間
           </div>
         </footer>
+        {/* Elfsight widget platform — required for Instagram widget on /mangrove-space */}
+        <Script src="https://static.elfsight.com/platform/platform.js" strategy="lazyOnload" />
       </body>
     </html>
   );
